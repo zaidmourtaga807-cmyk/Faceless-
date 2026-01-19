@@ -3,57 +3,120 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SORA AI VIDEO STUDIO</title>
+    <title>SORA AI PLATFORM</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        body { background: #000; color: white; min-height: 100vh; display: flex; align-items: center; justify-content: center; font-family: sans-serif; padding: 20px; }
-        .studio-card { background: #0a0a0a; border: 1px solid #1a1a1a; border-radius: 30px; padding: 2rem; width: 100%; max-width: 450px; text-align: center; }
-        .ai-input { background: #111; border: 1px solid #222; border-radius: 15px; padding: 15px; width: 100%; color: white; outline: none; margin-bottom: 20px; }
-        .btn-gen { background: linear-gradient(90deg, #7c3aed, #4f46e5); padding: 15px; border-radius: 15px; width: 100%; font-weight: bold; cursor: pointer; border: none; transition: 0.3s; }
-        .btn-gen:active { transform: scale(0.98); }
-        .loading-dots { display: none; margin-top: 20px; }
-        #videoOutput img { width: 100%; border-radius: 15px; margin-top: 20px; border: 1px solid #333; }
+        body { background: #080808; color: white; font-family: 'Inter', sans-serif; min-height: 100vh; }
+        .tab-btn { padding: 10px 20px; border-radius: 12px; transition: 0.3s; cursor: pointer; border: 1px solid #222; }
+        .tab-btn.active { background: #7c3aed; border-color: #7c3aed; box-shadow: 0 0 15px rgba(124, 58, 237, 0.4); }
+        .glass-panel { background: #111; border: 1px solid #222; border-radius: 24px; padding: 25px; }
+        .ai-field { background: #1a1a1a; border: 1px solid #333; border-radius: 12px; padding: 12px; width: 100%; color: white; outline: none; }
+        .ai-field:focus { border-color: #7c3aed; }
+        .gen-button { background: linear-gradient(135deg, #7c3aed, #4f46e5); padding: 15px; border-radius: 15px; width: 100%; font-weight: bold; margin-top: 15px; transition: 0.3s; }
+        .gen-button:hover { opacity: 0.9; transform: translateY(-2px); }
     </style>
 </head>
-<body>
+<body class="p-4 md:p-10">
 
-    <div class="studio-card">
-        <h1 class="text-2xl font-bold mb-6 bg-gradient-to-r from-purple-400 to-blue-400 bg-clip-text text-transparent">SORA VIDEO PRO</h1>
-        
-        <textarea id="promptField" class="ai-input" rows="3" placeholder="اكتب وصف الفيديو بالإنجليزية هنا..."></textarea>
-        
-        <button onclick="startAction()" id="actionBtn" class="btn-gen">توليد فيديو الآن 🎬</button>
+    <div class="max-w-4xl mx-auto">
+        <header class="text-center mb-10">
+            <h1 class="text-4xl font-black bg-gradient-to-r from-purple-400 to-indigo-400 bg-clip-text text-transparent">SORA AI STUDIO</h1>
+            <p class="text-gray-500 mt-2">منصة الذكاء الاصطناعي المتكاملة</p>
+        </header>
 
-        <div id="loadingUI" class="loading-dots">
-            <p class="text-sm text-purple-500 animate-pulse">جاري الاتصال بالسيرفر...</p>
+        <div class="flex justify-center gap-4 mb-8">
+            <div id="tabImage" onclick="switchTab('image')" class="tab-btn active font-bold">توليد الصور 🖼️</div>
+            <div id="tabVideo" onclick="switchTab('video')" class="tab-btn font-bold">توليد الفيديو 🎬</div>
         </div>
 
-        <div id="videoOutput" class="hidden">
-            <div id="mediaTarget"></div>
-            <p class="text-xs text-gray-500 mt-2 italic">اضغط مطولاً على الفيديو لحفظه</p>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div class="glass-panel">
+                <h3 class="text-lg font-bold mb-4 border-b border-gray-800 pb-2">إعدادات المحرك</h3>
+                
+                <label class="text-xs text-gray-400 block mb-2">وصف المشهد (بالإنجليزي)</label>
+                <textarea id="mainPrompt" class="ai-field mb-4" rows="4" placeholder="مثال: A futuristic lion in the space..."></textarea>
+
+                <label class="text-xs text-gray-400 block mb-2">الأبعاد (Aspect Ratio)</label>
+                <select id="ratio" class="ai-field mb-4">
+                    <option value="1:1">مربع (1:1)</option>
+                    <option value="16:9">يوتيوب (16:9)</option>
+                    <option value="9:16">تيك توك (9:16)</option>
+                </select>
+
+                <button id="mainBtn" onclick="generateContent()" class="gen-button">ابدأ التوليد الآن ✨</button>
+                
+                <div id="loader" class="hidden mt-4 text-center">
+                    <div class="inline-block w-6 h-6 border-2 border-purple-500 border-t-transparent rounded-full animate-spin"></div>
+                    <p class="text-xs text-gray-500 mt-2 italic">جاري معالجة طلبك عبر السيرفر...</p>
+                </div>
+            </div>
+
+            <div class="glass-panel flex flex-col items-center justify-center min-h-[300px]">
+                <h3 class="text-lg font-bold mb-4 self-start border-b border-gray-800 w-full pb-2 text-right">معاينة النتيجة</h3>
+                <div id="resultBox" class="w-full flex items-center justify-center text-gray-600 italic text-sm">
+                    النتيجة ستظهر هنا...
+                </div>
+                <div id="downloadArea" class="hidden mt-4 w-full">
+                    <button onclick="downloadResult()" class="w-full border border-purple-500 text-purple-500 py-2 rounded-xl text-xs font-bold hover:bg-purple-500 hover:text-white transition">تحميل النتيجة 📥</button>
+                </div>
+            </div>
         </div>
     </div>
 
     <script>
-        function startAction() {
-            const prompt = document.getElementById('promptField').value;
-            const btn = document.getElementById('actionBtn');
-            const loader = document.getElementById('loadingUI');
-            const output = document.getElementById('videoOutput');
-            const target = document.getElementById('mediaTarget');
+        let currentMode = 'image';
 
-            if (!prompt) {
-                alert("الرجاء كتابة وصف أولاً");
-                return;
-            }
+        function switchTab(mode) {
+            currentMode = mode;
+            document.getElementById('tabImage').classList.toggle('active', mode === 'image');
+            document.getElementById('tabVideo').classList.toggle('active', mode === 'video');
+            document.getElementById('mainBtn').innerText = mode === 'image' ? 'توليد الصورة ✨' : 'توليد الفيديو 🎬';
+        }
 
-            // تعطيل الزر وتشغيل التحميل
+        async function generateContent() {
+            const prompt = document.getElementById('mainPrompt').value;
+            const btn = document.getElementById('mainBtn');
+            const loader = document.getElementById('loader');
+            const resultBox = document.getElementById('resultBox');
+            const downloadArea = document.getElementById('downloadArea');
+
+            if (!prompt) return alert("الرجاء كتابة وصف!");
+
+            // تفعيل حالة التحميل
             btn.disabled = true;
-            btn.innerText = "جاري المعالجة...";
-            loader.style.display = "block";
-            output.classList.add('hidden');
+            loader.classList.remove('hidden');
+            resultBox.innerHTML = '';
+            downloadArea.classList.add('hidden');
 
-            const seed = Math.floor(Math.random() * 100000);
-            // استخدام رابط مباشر ومضمون
-            const finalLink = `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?width=1024&
+            const seed = Math.floor(Math.random() * 999999);
+            const ratio = document.getElementById('ratio').value;
+            
+            // تخصيص الأبعاد
+            let w=1024, h=1024;
+            if(ratio === '16:9') { w=1280; h=720; }
+            if(ratio === '9:16') { w=720; h=1280; }
+
+            // المحرك
+            const url = `https://pollinations.ai/p/${encodeURIComponent(prompt)}?width=${w}&height=${h}&seed=${seed}&nologo=true&model=${currentMode === 'image' ? 'flux' : 'turbo'}`;
+
+            const img = new Image();
+            img.src = url;
+            img.className = "w-full rounded-xl shadow-lg border border-gray-800";
+            
+            img.onload = () => {
+                resultBox.innerHTML = '';
+                resultBox.appendChild(img);
+                loader.classList.add('hidden');
+                downloadArea.classList.remove('hidden');
+                btn.disabled = false;
+            };
+
+            img.onerror = () => {
+                alert("حدث خطأ في السيرفر، جرب مرة أخرى");
+                btn.disabled = false;
+                loader.classList.add('hidden');
+            };
+        }
+
+        function
         
