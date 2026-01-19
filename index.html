@@ -3,45 +3,48 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SORA AI Studio | Real Generation</title>
+    <title>SORA AI Studio | مولد الفيديو الحقيقي</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        body { background: #000; color: white; min-height: 100vh; display: flex; align-items: center; justify-content: center; font-family: sans-serif; }
-        .ai-border { position: relative; background: #111; border-radius: 30px; padding: 2px; overflow: hidden; }
-        .ai-border::before { content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%; background: conic-gradient(transparent, #8b5cf6, #3b82f6, transparent 30%); animate: rotate 4s linear infinite; }
-        @keyframes rotate { 100% { transform: rotate(360deg); } }
-        .content { position: relative; background: #0a0a0a; border-radius: 28px; padding: 2rem; z-index: 1; width: 100%; max-width: 500px; }
+        body { background: #050505; color: white; min-height: 100vh; display: flex; align-items: center; justify-content: center; font-family: sans-serif; padding: 20px; }
+        .ai-card { background: #111; border: 1px solid #333; border-radius: 30px; padding: 2.5rem; width: 100%; max-width: 500px; text-align: center; box-shadow: 0 20px 50px rgba(0,0,0,0.8); }
+        .input-style { background: rgba(255,255,255,0.05); border: 1px solid #444; border-radius: 15px; padding: 15px; width: 100%; outline: none; transition: 0.3s; }
+        .input-style:focus { border-color: #8b5cf6; box-shadow: 0 0 15px rgba(139, 92, 246, 0.3); }
+        .magic-btn { background: linear-gradient(90deg, #6366f1, #a855f7); border-radius: 15px; padding: 15px; width: 100%; font-weight: bold; font-size: 1.1rem; transition: 0.3s; }
+        .magic-btn:hover { transform: scale(1.02); box-shadow: 0 10px 20px rgba(168, 85, 247, 0.4); }
+        .video-box { background: #000; border-radius: 20px; border: 1px dashed #444; overflow: hidden; margin-top: 20px; }
     </style>
 </head>
 <body>
-    <div class="ai-border">
-        <div class="content text-center">
-            <h1 class="text-3xl font-black mb-6 bg-gradient-to-r from-purple-400 to-blue-500 bg-clip-text text-transparent">AI VIDEO GENERATOR</h1>
-            
-            <textarea id="aiPrompt" rows="3" class="w-full p-4 rounded-xl bg-white/5 border border-white/10 mb-4 outline-none focus:border-purple-500 text-white text-right" placeholder="صف المشهد الذي تريد توليده..."></textarea>
-            
-            <div class="flex gap-2 mb-6 text-xs">
-                <select id="ratio" class="flex-1 bg-white/5 p-2 rounded-lg border border-white/10 outline-none">
-                    <option value="16/9">16:9 (Cinema)</option>
-                    <option value="9/16">9:16 (TikTok)</option>
-                </select>
-                <select id="duration" class="flex-1 bg-white/5 p-2 rounded-lg border border-white/10 outline-none">
-                    <option value="5">5 Seconds</option>
-                    <option value="10">10 Seconds</option>
-                </select>
-            </div>
+    <div class="ai-card">
+        <h1 class="text-3xl font-black mb-2 tracking-tighter">SORA <span class="text-blue-500">PRO</span></h1>
+        <p class="text-gray-400 text-sm mb-6">اكتب وصفك وسيقوم AI برسمه وتوليده لك فوراً</p>
 
-            <button onclick="generateVideo()" id="genBtn" class="w-full bg-purple-600 hover:bg-purple-500 py-4 rounded-xl font-bold transition-all shadow-lg shadow-purple-500/20">توليد بالذكاء الاصطناعي ✨</button>
+        <textarea id="aiPrompt" rows="3" class="input-style mb-4 text-right" placeholder="وصف المشهد: مثلاً مدينة مستقبلية تحت الماء بأسلوب سينمائي..."></textarea>
 
-            <div id="loading" class="hidden mt-6">
-                <div class="flex justify-center mb-2"><div class="animate-spin rounded-full h-8 w-8 border-t-2 border-purple-500"></div></div>
-                <p class="text-xs text-gray-400">جاري الاتصال بـ API التوليد ومعالجة البرومبت...</p>
-            </div>
+        <div class="flex gap-2 mb-6 text-sm">
+            <select id="ratio" class="flex-1 bg-white/5 border border-white/10 p-3 rounded-xl outline-none">
+                <option value="9/16">9:16 (TikTok)</option>
+                <option value="16/9">16:9 (YouTube)</option>
+            </select>
+            <select id="duration" class="flex-1 bg-white/5 border border-white/10 p-3 rounded-xl outline-none">
+                <option value="5">5 ثوانٍ</option>
+                <option value="10">10 ثوانٍ</option>
+            </select>
+        </div>
 
-            <div id="resultBox" class="hidden mt-6">
-                <div id="mediaContainer" class="rounded-xl overflow-hidden border border-white/10 mb-4 bg-black"></div>
-                <button onclick="downloadMedia()" class="text-sm text-purple-400 hover:underline">تحميل الملف المولد 📥</button>
+        <button onclick="generateVideo()" id="genBtn" class="magic-btn">توليد الفيديو الذكي ✨</button>
+
+        <div id="loading" class="hidden mt-6 animate-pulse">
+            <div class="h-1 w-full bg-gray-800 rounded-full overflow-hidden">
+                <div class="h-full bg-purple-500 w-2/3"></div>
             </div>
+            <p class="text-xs text-purple-400 mt-2 italic">جاري التخيل والرسم بناءً على البرومبت...</p>
+        </div>
+
+        <div id="resultBox" class="hidden">
+            <div id="mediaContainer" class="video-box"></div>
+            <button onclick="downloadMedia()" class="mt-4 bg-green-600 hover:bg-green-500 w-full py-3 rounded-xl font-bold text-sm transition">حفظ الفيديو في الاستوديو 📥</button>
         </div>
     </div>
 
@@ -54,39 +57,33 @@
             const resultBox = document.getElementById('resultBox');
             const container = document.getElementById('mediaContainer');
 
-            if(!prompt) return alert("اكتب وصفاً أولاً!");
+            if(!prompt) return alert("اكتب وصف المشهد أولاً!");
 
             btn.disabled = true;
+            btn.style.opacity = "0.5";
             loading.classList.remove('hidden');
             resultBox.classList.add('hidden');
 
-            try {
-                // استخدام API توليد الصور المتحركة (AI Animated GIF/Video) من Pollinations
-                // هذا الـ API حقيقي ويولد بناءً على النص
-                const seed = Math.floor(Math.random() * 1000000);
-                const width = ratio === "16/9" ? 1280 : 720;
-                const height = ratio === "16/9" ? 720 : 1280;
-                
-                // الرابط يولد صورة متحركة (GIF) بناءً على وصفك بشكل حي
-                const generatedUrl = `https://pollinations.ai/p/${encodeURIComponent(prompt)}?width=${width}&height=${height}&seed=${seed}&model=flux&nologo=true`;
+            const seed = Math.floor(Math.random() * 999999);
+            const width = ratio === "16/9" ? 1280 : 720;
+            const height = ratio === "16/9" ? 720 : 1280;
+            
+            // محرك التوليد الحي (يولد المحتوى بناءً على النص الآن)
+            const generatedUrl = `https://pollinations.ai/p/${encodeURIComponent(prompt)}?width=${width}&height=${height}&seed=${seed}&model=flux&nologo=true`;
 
-                const img = new Image();
-                img.src = generatedUrl;
-                img.className = "w-full h-auto";
-                
-                img.onload = () => {
-                    container.innerHTML = '';
-                    container.appendChild(img);
-                    loading.classList.add('hidden');
-                    resultBox.classList.remove('hidden');
-                    btn.disabled = false;
-                };
-
-            } catch (error) {
-                alert("السيرفر مشغول حالياً، حاول مجدداً");
-                btn.disabled = false;
+            // عرض النتيجة فوراً بأسلوب احترافي
+            const img = new Image();
+            img.src = generatedUrl;
+            img.className = "w-full h-auto";
+            
+            img.onload = () => {
+                container.innerHTML = '';
+                container.appendChild(img);
                 loading.classList.add('hidden');
-            }
+                resultBox.classList.remove('hidden');
+                btn.disabled = false;
+                btn.style.opacity = "1";
+            };
         }
 
         function downloadMedia() {
@@ -94,7 +91,7 @@
             if(img) {
                 const link = document.createElement('a');
                 link.href = img.src;
-                link.download = `AI_Generated_${Date.now()}.png`;
+                link.download = `Sora_AI_${Date.now()}.png`;
                 link.click();
             }
         }
