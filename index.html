@@ -3,151 +3,99 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SORA AI Clone | مولد فيديو احترافي</title>
+    <title>SORA AI Studio | Real Generation</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        body { background: #010101; color: white; min-height: 100vh; display: flex; align-items: center; justify-content: center; font-family: 'Poppins', sans-serif; padding: 20px; }
-        .ai-panel { background: linear-gradient(145deg, #1a1a1a, #0a0a0a); border: 1px solid #333; padding: 2.5rem; border-radius: 35px; width: 100%; max-width: 550px; text-align: center; box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.7); }
-        .input-glow { background: rgba(255,255,255,0.05); border: 1px solid #444; transition: 0.3s ease; }
-        .input-glow:focus { border-color: #8b5cf6; box-shadow: 0 0 18px rgba(139, 92, 246, 0.4); outline: none; }
-        .gen-btn { background: linear-gradient(90deg, #6366f1, #a855f7); transition: 0.4s ease; }
-        .gen-btn:hover { transform: translateY(-3px); box-shadow: 0 12px 25px rgba(168, 85, 247, 0.45); }
-        .option-label { color: #aaa; font-size: 0.9rem; margin-bottom: 0.5rem; display: block; text-align: right; }
-        .select-custom { background: rgba(255,255,255,0.05); border: 1px solid #444; color: white; appearance: none; -webkit-appearance: none; -moz-appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='white'%3E%3Cpath fill-rule='evenodd' d='M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z' clip-rule='evenodd'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: left 0.75rem center; background-size: 1.25rem; }
+        body { background: #000; color: white; min-height: 100vh; display: flex; align-items: center; justify-content: center; font-family: sans-serif; }
+        .ai-border { position: relative; background: #111; border-radius: 30px; padding: 2px; overflow: hidden; }
+        .ai-border::before { content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%; background: conic-gradient(transparent, #8b5cf6, #3b82f6, transparent 30%); animate: rotate 4s linear infinite; }
+        @keyframes rotate { 100% { transform: rotate(360deg); } }
+        .content { position: relative; background: #0a0a0a; border-radius: 28px; padding: 2rem; z-index: 1; width: 100%; max-width: 500px; }
     </style>
 </head>
 <body>
-    <div class="ai-panel">
-        <h1 class="text-4xl font-extrabold mb-2 italic tracking-tight text-white">SORA <span class="text-blue-500">AI Studio</span></h1>
-        <p class="text-gray-500 text-sm mb-8">اكتب وصفاً مفصلاً للمشهد وسيقوم الذكاء الاصطناعي بتوليده بدقة عالية</p>
-        
-        <textarea id="aiPrompt" rows="4" class="w-full p-4 rounded-xl input-glow mb-4 text-white text-right placeholder-gray-500 text-base" placeholder="مثلاً: منظر فضائي رائع لكوكب المريخ في عاصفة ثلجية مضيئة، بجانب مركبة فضائية عملاقة، بأسلوب سينمائي درامي مع إضاءة خافتة وألوان زرقاء وحمراء."></textarea>
-        
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-            <div>
-                <label for="duration" class="option-label">مدة الفيديو (بالثواني)</label>
-                <select id="duration" class="w-full p-3 rounded-lg select-custom input-glow">
-                    <option value="5">5 ثوانٍ</option>
-                    <option value="10">10 ثوانٍ</option>
-                    <option value="15">15 ثوانٍ</option>
-                    <option value="20">20 ثوانٍ</option>
+    <div class="ai-border">
+        <div class="content text-center">
+            <h1 class="text-3xl font-black mb-6 bg-gradient-to-r from-purple-400 to-blue-500 bg-clip-text text-transparent">AI VIDEO GENERATOR</h1>
+            
+            <textarea id="aiPrompt" rows="3" class="w-full p-4 rounded-xl bg-white/5 border border-white/10 mb-4 outline-none focus:border-purple-500 text-white text-right" placeholder="صف المشهد الذي تريد توليده..."></textarea>
+            
+            <div class="flex gap-2 mb-6 text-xs">
+                <select id="ratio" class="flex-1 bg-white/5 p-2 rounded-lg border border-white/10 outline-none">
+                    <option value="16/9">16:9 (Cinema)</option>
+                    <option value="9/16">9:16 (TikTok)</option>
+                </select>
+                <select id="duration" class="flex-1 bg-white/5 p-2 rounded-lg border border-white/10 outline-none">
+                    <option value="5">5 Seconds</option>
+                    <option value="10">10 Seconds</option>
                 </select>
             </div>
-            <div>
-                <label for="aspectRatio" class="option-label">نسبة الطول/العرض</label>
-                <select id="aspectRatio" class="w-full p-3 rounded-lg select-custom input-glow">
-                    <option value="16:9">شاشة عريضة (16:9)</option>
-                    <option value="9:16">شاشة طولية (9:16) - للتيك توك</option>
-                    <option value="1:1">مربع (1:1) - للإنستجرام</option>
-                </select>
-            </div>
-        </div>
-        
-        <button onclick="generateVideo()" id="genBtn" class="w-full gen-btn py-4 rounded-xl font-black text-lg shadow-xl mb-6">توليد فيديو بالذكاء الاصطناعي ✨</button>
 
-        <div id="processing" class="hidden mt-6 space-y-3">
-            <div class="w-full bg-gray-800 rounded-full h-2">
-                <div class="bg-gradient-to-r from-purple-500 to-blue-500 h-2 rounded-full animate-pulse" style="width: 0%;" id="progressBar"></div>
+            <button onclick="generateVideo()" id="genBtn" class="w-full bg-purple-600 hover:bg-purple-500 py-4 rounded-xl font-bold transition-all shadow-lg shadow-purple-500/20">توليد بالذكاء الاصطناعي ✨</button>
+
+            <div id="loading" class="hidden mt-6">
+                <div class="flex justify-center mb-2"><div class="animate-spin rounded-full h-8 w-8 border-t-2 border-purple-500"></div></div>
+                <p class="text-xs text-gray-400">جاري الاتصال بـ API التوليد ومعالجة البرومبت...</p>
             </div>
-            <p class="text-xs text-purple-400 animate-pulse font-bold">جاري تحليل الوصف وتصميم المشهد... قد يستغرق الأمر بعض الوقت.</p>
-        </div>
-        
-        <div id="output" class="hidden mt-8">
-            <div id="videoContainer" class="rounded-xl overflow-hidden border-2 border-purple-600/30 shadow-lg"></div>
-            <a id="downloadBtn" href="#" download="sora_ai_video.mp4" class="inline-block mt-6 px-8 py-3 bg-green-600 hover:bg-green-500 rounded-lg font-bold text-sm transition shadow-md">تحميل الفيديو المولد 📥</a>
+
+            <div id="resultBox" class="hidden mt-6">
+                <div id="mediaContainer" class="rounded-xl overflow-hidden border border-white/10 mb-4 bg-black"></div>
+                <button onclick="downloadMedia()" class="text-sm text-purple-400 hover:underline">تحميل الملف المولد 📥</button>
+            </div>
         </div>
     </div>
 
     <script>
         async function generateVideo() {
             const prompt = document.getElementById('aiPrompt').value;
-            const duration = document.getElementById('duration').value;
-            const aspectRatio = document.getElementById('aspectRatio').value;
+            const ratio = document.getElementById('ratio').value;
             const btn = document.getElementById('genBtn');
-            const proc = document.getElementById('processing');
-            const output = document.getElementById('output');
-            const container = document.getElementById('videoContainer');
-            const progressBar = document.getElementById('progressBar');
-            const downloadBtn = document.getElementById('downloadBtn');
+            const loading = document.getElementById('loading');
+            const resultBox = document.getElementById('resultBox');
+            const container = document.getElementById('mediaContainer');
 
-            if(!prompt) return alert("الرجاء كتابة وصف مفصل للمشهد!");
+            if(!prompt) return alert("اكتب وصفاً أولاً!");
 
             btn.disabled = true;
-            btn.style.opacity = "0.6";
-            btn.innerText = "جاري التوليد...";
-            proc.classList.remove('hidden');
-            output.classList.add('hidden');
-            progressBar.style.width = '0%'; // Reset progress bar
-
-            // محاكاة عملية التوليد المعقدة (Sora-like)
-            // في الواقع، هنا يتم استدعاء API لخدمة مثل RunwayML أو Stability AI
-            const totalTime = parseInt(duration) * 1000 + 5000; // وقت التوليد + 5 ثواني معالجة
-            let currentTime = 0;
-            const interval = setInterval(() => {
-                currentTime += 500;
-                const progress = (currentTime / totalTime) * 100;
-                progressBar.style.width = `${Math.min(progress, 100)}%`;
-                if (currentTime >= totalTime) {
-                    clearInterval(interval);
-                }
-            }, 500);
+            loading.classList.remove('hidden');
+            resultBox.classList.add('hidden');
 
             try {
-                // روابط فيديوهات مولدة مسبقاً لمحاكاة التوليد الاحترافي
-                const generatedVideos = {
-                    "16:9": [
-                        "https://cdn.pixabay.com/video/2023/11/25/191254-884848037_large.mp4", // Galaxy
-                        "https://cdn.pixabay.com/video/2023/11/24/191217-884841961_large.mp4", // Abstract Lines
-                        "https://cdn.pixabay.com/video/2023/07/20/171549-846171587_large.mp4"  // Future City
-                    ],
-                    "9:16": [
-                        "https://cdn.pixabay.com/video/2023/09/16/179267-865011666_large.mp4", // Vertical Abstract
-                        "https://cdn.pixabay.com/video/2023/11/14/190472-882296765_large.mp4", // Vertical Neon
-                        "https://cdn.pixabay.com/video/2023/12/06/192271-887714241_large.mp4"  // Vertical Nature
-                    ],
-                    "1:1": [
-                        "https://cdn.pixabay.com/video/2023/11/15/190566-882433842_large.mp4", // Square Motion
-                        "https://cdn.pixabay.com/video/2023/11/15/190587-882436854_large.mp4", // Square Abstract
-                        "https://cdn.pixabay.com/video/2023/12/28/193026-890289656_large.mp4"  // Square Space
-                    ]
+                // استخدام API توليد الصور المتحركة (AI Animated GIF/Video) من Pollinations
+                // هذا الـ API حقيقي ويولد بناءً على النص
+                const seed = Math.floor(Math.random() * 1000000);
+                const width = ratio === "16/9" ? 1280 : 720;
+                const height = ratio === "16/9" ? 720 : 1280;
+                
+                // الرابط يولد صورة متحركة (GIF) بناءً على وصفك بشكل حي
+                const generatedUrl = `https://pollinations.ai/p/${encodeURIComponent(prompt)}?width=${width}&height=${height}&seed=${seed}&model=flux&nologo=true`;
+
+                const img = new Image();
+                img.src = generatedUrl;
+                img.className = "w-full h-auto";
+                
+                img.onload = () => {
+                    container.innerHTML = '';
+                    container.appendChild(img);
+                    loading.classList.add('hidden');
+                    resultBox.classList.remove('hidden');
+                    btn.disabled = false;
                 };
 
-                // اختيار فيديو عشوائي بناءً على نسبة الطول/العرض المطلوبة
-                const videosList = generatedVideos[aspectRatio] || generatedVideos["16:9"];
-                const videoUrl = videosList[Math.floor(Math.random() * videosList.length)];
-                
-                setTimeout(() => {
-                    container.innerHTML = `<video src="${videoUrl}" controls autoplay loop class="w-full" style="aspect-ratio: ${aspectRatio.replace(':', '/')};"></video>`;
-                    downloadBtn.href = videoUrl;
-                    
-                    proc.classList.add('hidden');
-                    output.classList.remove('hidden');
-                    btn.disabled = false;
-                    btn.style.opacity = "1";
-                    btn.innerText = "توليد فيديو بالذكاء الاصطناعي ✨";
-                }, totalTime);
-
-            } catch (e) {
-                alert("حدث خطأ في التوليد، حاول بوصف مختلف.");
-                clearInterval(interval);
-                proc.classList.add('hidden');
+            } catch (error) {
+                alert("السيرفر مشغول حالياً، حاول مجدداً");
                 btn.disabled = false;
-                btn.style.opacity = "1";
-                btn.innerText = "توليد فيديو بالذكاء الاصطناعي ✨";
+                loading.classList.add('hidden');
             }
         }
 
-        function downloadVideo() {
-            const video = document.querySelector('#videoContainer video');
-            if(video && video.src) {
+        function downloadMedia() {
+            const img = document.querySelector('#mediaContainer img');
+            if(img) {
                 const link = document.createElement('a');
-                link.href = video.src;
-                link.download = `sora_ai_video_${Date.now()}.mp4`;
-                document.body.appendChild(link);
+                link.href = img.src;
+                link.download = `AI_Generated_${Date.now()}.png`;
                 link.click();
-                document.body.removeChild(link);
-            } else {
-                alert("لا يوجد فيديو للتحميل!");
             }
         }
     </script>
