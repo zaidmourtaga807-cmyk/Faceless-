@@ -33,28 +33,29 @@
         const videoBox = document.getElementById('videoBox');
         const player = document.getElementById('player');
 
-        if(!prompt) return alert("اكتب موضوعاً أولاً!");
+        if(!prompt) return alert("اكتب أي كلمة أولاً!");
 
         btn.disabled = true;
         loading.classList.remove('hidden');
-        
-        // محرك فيديوهات عشوائي سريع جداً للتجربة المباشرة
-        const randomId = Math.floor(Math.random() * 1000);
-        const videoUrl = `https://cdn.pixabay.com/vimeo/328940142/milky-way-23308.mp4?width=1280&hash=85e83922c26d7f5700b0e95c1c8a1e5a5c6c8e5`;
+        videoBox.classList.add('hidden');
 
-        // سنقوم بتشغيل الفيديو فوراً
-        player.src = videoUrl;
-        player.onloadeddata = function() {
-            loading.classList.add('hidden');
-            videoBox.classList.remove('hidden');
-            btn.disabled = false;
-            player.play();
-        };
-        
-        player.onerror = function() {
-            alert("جاري تحديث الرابط، اضغط توليد مرة أخرى");
-            btn.disabled = false;
-            loading.classList.add('hidden');
-        };
+        // هذا رابط فيديو ثابت ومضمون 100% لتجربة عمل الموقع
+        const stableVideo = "https://assets.mixkit.co/videos/preview/mixkit-stars-in-the-night-sky-11641-large.mp4";
+
+        setTimeout(() => {
+            player.src = stableVideo;
+            player.load();
+            player.play().then(() => {
+                loading.classList.add('hidden');
+                videoBox.classList.remove('hidden');
+                btn.disabled = false;
+            }).catch(err => {
+                // إذا فشل التشغيل التلقائي
+                loading.classList.add('hidden');
+                videoBox.classList.remove('hidden');
+                btn.disabled = false;
+            });
+        }, 1000);
     }
-</script>
+    </script>
+    
