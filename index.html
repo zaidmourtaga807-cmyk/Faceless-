@@ -3,55 +3,152 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Faceless AI Maker</title>
+    <title>SORA AI Clone | مولد فيديو احترافي</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        body { background: #020617; color: white; min-height: 100vh; display: flex; align-items: center; justify-content: center; font-family: sans-serif; }
-        .glass { background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.1); backdrop-filter: blur(10px); padding: 2rem; rounded-3xl: 1.5rem; width: 100%; max-width: 400px; text-align: center; border-radius: 24px; }
+        body { background: #010101; color: white; min-height: 100vh; display: flex; align-items: center; justify-content: center; font-family: 'Poppins', sans-serif; padding: 20px; }
+        .ai-panel { background: linear-gradient(145deg, #1a1a1a, #0a0a0a); border: 1px solid #333; padding: 2.5rem; border-radius: 35px; width: 100%; max-width: 550px; text-align: center; box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.7); }
+        .input-glow { background: rgba(255,255,255,0.05); border: 1px solid #444; transition: 0.3s ease; }
+        .input-glow:focus { border-color: #8b5cf6; box-shadow: 0 0 18px rgba(139, 92, 246, 0.4); outline: none; }
+        .gen-btn { background: linear-gradient(90deg, #6366f1, #a855f7); transition: 0.4s ease; }
+        .gen-btn:hover { transform: translateY(-3px); box-shadow: 0 12px 25px rgba(168, 85, 247, 0.45); }
+        .option-label { color: #aaa; font-size: 0.9rem; margin-bottom: 0.5rem; display: block; text-align: right; }
+        .select-custom { background: rgba(255,255,255,0.05); border: 1px solid #444; color: white; appearance: none; -webkit-appearance: none; -moz-appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='white'%3E%3Cpath fill-rule='evenodd' d='M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z' clip-rule='evenodd'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: left 0.75rem center; background-size: 1.25rem; }
     </style>
 </head>
 <body>
-    <div class="glass shadow-2xl">
-        <h1 class="text-3xl font-bold mb-6 bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent">Faceless AI</h1>
-        <input type="text" id="userPrompt" class="w-full p-4 rounded-xl bg-white/5 border border-white/10 mb-4 outline-none focus:border-blue-500 text-center" placeholder="اكتب فكرتك (مثلاً: Space)">
-        <button onclick="generateVideo()" id="btn" class="w-full bg-blue-600 hover:bg-blue-500 py-4 rounded-xl font-bold transition-all shadow-lg">توليد الفيديو الآن 🎬</button>
+    <div class="ai-panel">
+        <h1 class="text-4xl font-extrabold mb-2 italic tracking-tight text-white">SORA <span class="text-blue-500">AI Studio</span></h1>
+        <p class="text-gray-500 text-sm mb-8">اكتب وصفاً مفصلاً للمشهد وسيقوم الذكاء الاصطناعي بتوليده بدقة عالية</p>
+        
+        <textarea id="aiPrompt" rows="4" class="w-full p-4 rounded-xl input-glow mb-4 text-white text-right placeholder-gray-500 text-base" placeholder="مثلاً: منظر فضائي رائع لكوكب المريخ في عاصفة ثلجية مضيئة، بجانب مركبة فضائية عملاقة، بأسلوب سينمائي درامي مع إضاءة خافتة وألوان زرقاء وحمراء."></textarea>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+            <div>
+                <label for="duration" class="option-label">مدة الفيديو (بالثواني)</label>
+                <select id="duration" class="w-full p-3 rounded-lg select-custom input-glow">
+                    <option value="5">5 ثوانٍ</option>
+                    <option value="10">10 ثوانٍ</option>
+                    <option value="15">15 ثوانٍ</option>
+                    <option value="20">20 ثوانٍ</option>
+                </select>
+            </div>
+            <div>
+                <label for="aspectRatio" class="option-label">نسبة الطول/العرض</label>
+                <select id="aspectRatio" class="w-full p-3 rounded-lg select-custom input-glow">
+                    <option value="16:9">شاشة عريضة (16:9)</option>
+                    <option value="9:16">شاشة طولية (9:16) - للتيك توك</option>
+                    <option value="1:1">مربع (1:1) - للإنستجرام</option>
+                </select>
+            </div>
+        </div>
+        
+        <button onclick="generateVideo()" id="genBtn" class="w-full gen-btn py-4 rounded-xl font-black text-lg shadow-xl mb-6">توليد فيديو بالذكاء الاصطناعي ✨</button>
 
-        <div id="videoBox" class="hidden mt-6 rounded-xl overflow-hidden border border-white/10 shadow-inner bg-black">
-            <div id="container"></div>
+        <div id="processing" class="hidden mt-6 space-y-3">
+            <div class="w-full bg-gray-800 rounded-full h-2">
+                <div class="bg-gradient-to-r from-purple-500 to-blue-500 h-2 rounded-full animate-pulse" style="width: 0%;" id="progressBar"></div>
+            </div>
+            <p class="text-xs text-purple-400 animate-pulse font-bold">جاري تحليل الوصف وتصميم المشهد... قد يستغرق الأمر بعض الوقت.</p>
+        </div>
+        
+        <div id="output" class="hidden mt-8">
+            <div id="videoContainer" class="rounded-xl overflow-hidden border-2 border-purple-600/30 shadow-lg"></div>
+            <a id="downloadBtn" href="#" download="sora_ai_video.mp4" class="inline-block mt-6 px-8 py-3 bg-green-600 hover:bg-green-500 rounded-lg font-bold text-sm transition shadow-md">تحميل الفيديو المولد 📥</a>
         </div>
     </div>
 
     <script>
-        function generateVideo() {
-            const prompt = document.getElementById('userPrompt').value;
-            const btn = document.getElementById('btn');
-            const videoBox = document.getElementById('videoBox');
-            const container = document.getElementById('container');
+        async function generateVideo() {
+            const prompt = document.getElementById('aiPrompt').value;
+            const duration = document.getElementById('duration').value;
+            const aspectRatio = document.getElementById('aspectRatio').value;
+            const btn = document.getElementById('genBtn');
+            const proc = document.getElementById('processing');
+            const output = document.getElementById('output');
+            const container = document.getElementById('videoContainer');
+            const progressBar = document.getElementById('progressBar');
+            const downloadBtn = document.getElementById('downloadBtn');
 
-            if(!prompt) return alert("اكتب كلمة أولاً!");
+            if(!prompt) return alert("الرجاء كتابة وصف مفصل للمشهد!");
 
             btn.disabled = true;
-            btn.innerText = "جاري التحميل...";
+            btn.style.opacity = "0.6";
+            btn.innerText = "جاري التوليد...";
+            proc.classList.remove('hidden');
+            output.classList.add('hidden');
+            progressBar.style.width = '0%'; // Reset progress bar
 
-            // محرك عرض فيديوهات يعتمد على Embed لضمان التشغيل 100%
-            const query = encodeURIComponent(prompt);
-            container.innerHTML = `<iframe src="https://giphy.com/embed/target/video" width="100%" height="250" frameBorder="0" class="giphy-embed" allowFullScreen></iframe>
-            <p class="p-2 text-xs text-blue-400">تم جلب فيديو ذكي لـ ${prompt}</p>`;
-            
-            // روابط تجريبية مستقرة جداً
-            const embedLinks = [
-                "https://player.vimeo.com/video/336815944?autoplay=1&loop=1&background=1",
-                "https://player.vimeo.com/video/273691901?autoplay=1&loop=1&background=1"
-            ];
-            const randomVideo = embedLinks[Math.floor(Math.random() * embedLinks.length)];
-            
-            container.innerHTML = `<iframe src="${randomVideo}" width="100%" height="200" style="border:none;"></iframe>`;
+            // محاكاة عملية التوليد المعقدة (Sora-like)
+            // في الواقع، هنا يتم استدعاء API لخدمة مثل RunwayML أو Stability AI
+            const totalTime = parseInt(duration) * 1000 + 5000; // وقت التوليد + 5 ثواني معالجة
+            let currentTime = 0;
+            const interval = setInterval(() => {
+                currentTime += 500;
+                const progress = (currentTime / totalTime) * 100;
+                progressBar.style.width = `${Math.min(progress, 100)}%`;
+                if (currentTime >= totalTime) {
+                    clearInterval(interval);
+                }
+            }, 500);
 
-            setTimeout(() => {
-                videoBox.classList.remove('hidden');
+            try {
+                // روابط فيديوهات مولدة مسبقاً لمحاكاة التوليد الاحترافي
+                const generatedVideos = {
+                    "16:9": [
+                        "https://cdn.pixabay.com/video/2023/11/25/191254-884848037_large.mp4", // Galaxy
+                        "https://cdn.pixabay.com/video/2023/11/24/191217-884841961_large.mp4", // Abstract Lines
+                        "https://cdn.pixabay.com/video/2023/07/20/171549-846171587_large.mp4"  // Future City
+                    ],
+                    "9:16": [
+                        "https://cdn.pixabay.com/video/2023/09/16/179267-865011666_large.mp4", // Vertical Abstract
+                        "https://cdn.pixabay.com/video/2023/11/14/190472-882296765_large.mp4", // Vertical Neon
+                        "https://cdn.pixabay.com/video/2023/12/06/192271-887714241_large.mp4"  // Vertical Nature
+                    ],
+                    "1:1": [
+                        "https://cdn.pixabay.com/video/2023/11/15/190566-882433842_large.mp4", // Square Motion
+                        "https://cdn.pixabay.com/video/2023/11/15/190587-882436854_large.mp4", // Square Abstract
+                        "https://cdn.pixabay.com/video/2023/12/28/193026-890289656_large.mp4"  // Square Space
+                    ]
+                };
+
+                // اختيار فيديو عشوائي بناءً على نسبة الطول/العرض المطلوبة
+                const videosList = generatedVideos[aspectRatio] || generatedVideos["16:9"];
+                const videoUrl = videosList[Math.floor(Math.random() * videosList.length)];
+                
+                setTimeout(() => {
+                    container.innerHTML = `<video src="${videoUrl}" controls autoplay loop class="w-full" style="aspect-ratio: ${aspectRatio.replace(':', '/')};"></video>`;
+                    downloadBtn.href = videoUrl;
+                    
+                    proc.classList.add('hidden');
+                    output.classList.remove('hidden');
+                    btn.disabled = false;
+                    btn.style.opacity = "1";
+                    btn.innerText = "توليد فيديو بالذكاء الاصطناعي ✨";
+                }, totalTime);
+
+            } catch (e) {
+                alert("حدث خطأ في التوليد، حاول بوصف مختلف.");
+                clearInterval(interval);
+                proc.classList.add('hidden');
                 btn.disabled = false;
-                btn.innerText = "توليد الفيديو الآن 🎬";
-            }, 1000);
+                btn.style.opacity = "1";
+                btn.innerText = "توليد فيديو بالذكاء الاصطناعي ✨";
+            }
+        }
+
+        function downloadVideo() {
+            const video = document.querySelector('#videoContainer video');
+            if(video && video.src) {
+                const link = document.createElement('a');
+                link.href = video.src;
+                link.download = `sora_ai_video_${Date.now()}.mp4`;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            } else {
+                alert("لا يوجد فيديو للتحميل!");
+            }
         }
     </script>
 </body>
