@@ -3,96 +3,66 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SORA AI v3.0 | Real AI Generation</title>
+    <title>SORA AI PLATFORM v3.0</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        body { background: #000; color: white; min-height: 100vh; display: flex; align-items: center; justify-content: center; font-family: system-ui; padding: 20px; }
-        .glass-card { background: #0a0a0a; border: 1px solid #1a1a1a; border-radius: 24px; padding: 2rem; width: 100%; max-width: 480px; box-shadow: 0 0 40px rgba(124, 58, 237, 0.1); }
-        .ai-input { background: #111; border: 1px solid #222; border-radius: 16px; padding: 15px; width: 100%; color: white; outline: none; transition: 0.3s; }
-        .ai-input:focus { border-color: #8b5cf6; box-shadow: 0 0 10px rgba(139, 92, 246, 0.2); }
-        .btn-gen { background: #8b5cf6; border-radius: 16px; padding: 15px; width: 100%; font-weight: bold; transition: 0.3s; }
-        .btn-gen:hover { background: #7c3aed; transform: scale(1.01); }
-        #outputBox img { width: 100%; border-radius: 16px; border: 1px solid #222; margin-top: 20px; }
+        body { background: #050505; color: white; min-height: 100vh; font-family: sans-serif; }
+        .dashboard-container { max-width: 900px; margin: auto; padding: 20px; }
+        .glass-box { background: #0f0f0f; border: 1px solid #1f1f1f; border-radius: 24px; padding: 30px; }
+        .tab-active { border-bottom: 3px solid #8b5cf6; color: #8b5cf6; }
+        .input-style { background: #181818; border: 1px solid #282828; border-radius: 12px; padding: 15px; width: 100%; color: white; outline: none; }
+        .gen-btn { background: linear-gradient(135deg, #7c3aed, #4f46e5); padding: 15px; border-radius: 12px; width: 100%; font-weight: bold; transition: 0.3s; margin-top: 15px; }
+        #resultImg { width: 100%; border-radius: 15px; border: 1px solid #333; margin-top: 20px; }
     </style>
 </head>
 <body>
 
-    <div class="glass-card text-center">
-        <h1 class="text-3xl font-black mb-1 bg-gradient-to-r from-purple-500 to-indigo-400 bg-clip-text text-transparent">SORA AI STUDIO</h1>
-        <p class="text-gray-500 text-xs mb-6">توليد حقيقي عبر نماذج Stable Diffusion</p>
+    <div class="dashboard-container">
+        <header class="text-center py-10">
+            <h1 class="text-3xl font-black text-purple-500">SORA AI STUDIO</h1>
+            <p class="text-gray-500 text-sm">منصة توليد الصور والفيديوهات الاحترافية</p>
+        </header>
 
-        <textarea id="promptInput" rows="3" class="ai-input mb-4 text-right" placeholder="وصف المشهد بالإنجليزية (مثلاً: A magic forest at night)"></textarea>
-
-        <button onclick="generate()" id="btn" class="btn-gen mb-4">توليد المشهد الآن ✨</button>
-
-        <div id="loading" class="hidden">
-            <div class="flex justify-center gap-1 mb-2">
-                <div class="w-2 h-2 bg-purple-500 rounded-full animate-bounce"></div>
-                <div class="w-2 h-2 bg-purple-500 rounded-full animate-bounce [animation-delay:-.3s]"></div>
-                <div class="w-2 h-2 bg-purple-500 rounded-full animate-bounce [animation-delay:-.5s]"></div>
-            </div>
-            <p class="text-xs text-gray-500">جاري الرسم عبر محرك الذكاء الاصطناعي العالمي...</p>
+        <div class="flex justify-center space-x-8 space-x-reverse mb-8 border-b border-gray-800">
+            <button onclick="setMode('image')" id="imgTab" class="pb-2 font-bold tab-active">توليد صور 🖼️</button>
+            <button onclick="setMode('video')" id="vidTab" class="pb-2 font-bold text-gray-500">توليد فيديو 🎬</button>
         </div>
 
-        <div id="outputBox" class="hidden">
-            <div id="imageResult"></div>
-            <button onclick="downloadImg()" class="mt-4 text-sm text-purple-400 underline">حفظ الملف المولد 📥</button>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 italic">
+            <div class="glass-box">
+                <h3 class="mb-4 font-bold text-lg">لوحة التحكم</h3>
+                <textarea id="userPrompt" class="input-style h-32 text-right" placeholder="اكتب وصف المشهد بالإنجليزية..."></textarea>
+                
+                <div class="mt-4">
+                    <label class="text-xs text-gray-400">اختر الجودة:</label>
+                    <select id="quality" class="input-style mt-1 py-2">
+                        <option value="hd">عالية الدقة (HD)</option>
+                        <option value="4k">فائقة الدقة (4K)</option>
+                    </select>
+                </div>
+
+                <button onclick="process()" id="pBtn" class="gen-btn">ابدأ التوليد الآن ✨</button>
+            </div>
+
+            <div class="glass-box flex flex-col items-center justify-center">
+                <h3 class="mb-4 font-bold text-lg self-start">المعاينة الحية</h3>
+                <div id="displayArea" class="text-gray-700">انتظار الطلب...</div>
+                <div id="loader" class="hidden">جاري المعالجة... ⏳</div>
+                <div id="download" class="hidden mt-4">
+                    <button onclick="save()" class="text-purple-400 underline">تحميل النتيجة 📥</button>
+                </div>
+            </div>
         </div>
     </div>
 
     <script>
-        async function generate() {
-            const prompt = document.getElementById('promptInput').value;
-            const btn = document.getElementById('btn');
-            const loading = document.getElementById('loading');
-            const outputBox = document.getElementById('outputBox');
-            const imageResult = document.getElementById('imageResult');
-
-            if(!prompt) return alert("اكتب وصفاً أولاً!");
-
-            btn.disabled = true;
-            btn.style.opacity = "0.5";
-            loading.classList.remove('hidden');
-            outputBox.classList.add('hidden');
-
-            try {
-                // استخدام محرك توليد فوري لا يحتاج انتظار طابور
-                const randomSeed = Math.floor(Math.random() * 1000000);
-                const imageUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?width=1024&height=1024&seed=${randomSeed}&nologo=true`;
-
-                const img = new Image();
-                img.src = imageUrl;
-                
-                img.onload = () => {
-                    imageResult.innerHTML = `<img src="${imageUrl}" alt="AI Result">`;
-                    loading.classList.add('hidden');
-                    outputBox.classList.remove('hidden');
-                    btn.disabled = false;
-                    btn.style.opacity = "1";
-                };
-
-                img.onerror = () => {
-                    alert("السيرفر مشغول، اضغط توليد مرة أخرى");
-                    btn.disabled = false;
-                    loading.classList.add('hidden');
-                };
-
-            } catch (e) {
-                alert("حدث خطأ، حاول مجدداً");
-                btn.disabled = false;
-                loading.classList.add('hidden');
-            }
+        let mode = 'image';
+        function setMode(m) {
+            mode = m;
+            document.getElementById('imgTab').className = m === 'image' ? 'pb-2 font-bold tab-active' : 'pb-2 font-bold text-gray-500';
+            document.getElementById('vidTab').className = m === 'video' ? 'pb-2 font-bold tab-active' : 'pb-2 font-bold text-gray-500';
         }
 
-        function downloadImg() {
-            const img = document.querySelector('#imageResult img');
-            if(img) {
-                const link = document.createElement('a');
-                link.href = img.src;
-                link.download = 'AI_Generated.png';
-                link.click();
-            }
-        }
-    </script>
-</body>
-</html>
+        async function process() {
+            const p = document
+            
