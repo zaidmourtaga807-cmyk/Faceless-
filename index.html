@@ -3,42 +3,60 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Faceless AI - صانع الفيديو</title>
+    <title>Faceless AI Maker</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        body { background: radial-gradient(circle at center, #1e1b4b, #020617); color: white; min-height: 100vh; }
-        .glass { background: rgba(255, 255, 255, 0.05); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.1); }
+        body { background: #020617; color: white; min-height: 100vh; font-family: sans-serif; }
+        .glass { background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.1); backdrop-filter: blur(10px); }
     </style>
 </head>
-<body class="flex flex-col items-center justify-center p-6">
-    <div class="max-w-3xl w-full glass p-8 rounded-3xl shadow-2xl text-center">
-        <h1 class="text-4xl font-black mb-4 bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-purple-500">Faceless AI Maker</h1>
-        <p class="text-gray-400 mb-8 font-medium">اكتب موضوعك بالإنجليزية وسأجلب لك فيديوهات فوراً</p>
-        <textarea id="userPrompt" rows="3" class="w-full p-4 bg-black/50 rounded-xl border border-gray-700 focus:border-blue-500 outline-none mb-4 text-white text-right" placeholder="مثلاً: Space, Cars, Nature..."></textarea>
-        <button onclick="startMagic()" id="actionBtn" class="w-full bg-blue-600 hover:bg-blue-500 py-4 rounded-xl font-bold text-lg transition-all active:scale-95 shadow-lg shadow-blue-500/20">توليد الفيديو الآن 🎬</button>
-        <div id="status" class="mt-4 hidden text-blue-400 animate-pulse font-bold">جاري جلب اللقطات...</div>
-        <div id="videoContainer" class="mt-8 hidden">
-            <div id="videoResult" class="rounded-xl overflow-hidden border-2 border-blue-500/30"></div>
+<body class="flex items-center justify-center p-4">
+    <div class="max-w-md w-full glass p-8 rounded-3xl text-center shadow-2xl">
+        <h1 class="text-3xl font-bold mb-6 bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent">Faceless AI Maker</h1>
+        
+        <input type="text" id="userPrompt" class="w-full p-4 rounded-xl bg-white/5 border border-white/10 mb-4 outline-none focus:border-blue-500 text-center" placeholder="اكتب فكرتك هنا (مثلاً: فضاء)">
+        
+        <button onclick="generateVideo()" id="btn" class="w-full bg-blue-600 hover:bg-blue-500 py-4 rounded-xl font-bold transition-all shadow-lg shadow-blue-900/20">توليد الفيديو الآن 🎬</button>
+
+        <div id="loading" class="hidden mt-4 text-blue-400 animate-pulse">جاري جلب أفضل اللقطات...</div>
+        
+        <div id="videoBox" class="hidden mt-6 rounded-xl overflow-hidden border border-white/10 shadow-inner">
+            <video id="player" controls autoplay loop class="w-full"></video>
         </div>
     </div>
+
     <script>
-        async function startMagic() {
+        async function generateVideo() {
             const prompt = document.getElementById('userPrompt').value;
-            const btn = document.getElementById('actionBtn');
-            const status = document.getElementById('status');
-            const container = document.getElementById('videoContainer');
-            const result = document.getElementById('videoResult');
-            if(!prompt) return alert("اكتب كلمة أولاً!");
-            btn.disabled = true; status.classList.remove('hidden');
+            const btn = document.getElementById('btn');
+            const loading = document.getElementById('loading');
+            const videoBox = document.getElementById('videoBox');
+            const player = document.getElementById('player');
+
+            if(!prompt) return alert("اكتب أي كلمة أولاً!");
+
+            btn.disabled = true;
+            loading.classList.remove('hidden');
+            videoBox.classList.add('hidden');
+
             try {
-                const response = await fetch(`https://pixabay.com/api/videos/?key=41944645-316586027df590b073289047a&q=${encodeURIComponent(prompt)}&per_page=3`);
+                // استخدام محرك بحث عام لضمان النتائج
+                const searchTag = encodeURIComponent(prompt);
+                const response = await fetch(`https://pixabay.com/api/videos/?key=41944645-316586027df590b073289047a&q=${searchTag}&per_page=3`);
                 const data = await response.json();
-                if(data.hits && data.hits.length > 0) {
-                    result.innerHTML = `<video src="${data.hits[0].videos.medium.url}" controls autoplay loop class="w-full h-auto"></video>`;
-                    container.classList.remove('hidden');
-                } else { alert("لم أجد نتائج، جرب كلمة أخرى مثل Nature"); }
-            } catch (err) { alert("خطأ في الاتصال بالمحرك"); }
-            finally { btn.disabled = false; status.classList.add('hidden'); }
+
+                if (data.hits && data.hits.length > 0) {
+                    player.src = data.hits[0].videos.medium.url;
+                    videoBox.classList.remove('hidden');
+                } else {
+                    alert("لم أجد لقطات لهذه الكلمة، جرب كلمات مثل: Nature, Space, Cars");
+                }
+            } catch (error) {
+                alert("تأكد من اتصالك بالإنترنت وحاول مجدداً");
+            } finally {
+                btn.disabled = false;
+                loading.classList.add('hidden');
+            }
         }
     </script>
 </body>
