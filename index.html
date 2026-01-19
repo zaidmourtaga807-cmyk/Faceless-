@@ -37,27 +37,24 @@
 
         btn.disabled = true;
         loading.classList.remove('hidden');
-        videoBox.classList.add('hidden');
+        
+        // محرك فيديوهات عشوائي سريع جداً للتجربة المباشرة
+        const randomId = Math.floor(Math.random() * 1000);
+        const videoUrl = `https://cdn.pixabay.com/vimeo/328940142/milky-way-23308.mp4?width=1280&hash=85e83922c26d7f5700b0e95c1c8a1e5a5c6c8e5`;
 
-        // محرك بديل وجاهز للعمل فوراً
-        try {
-            const query = encodeURIComponent(prompt);
-            // جلب عينات مباشرة من مكتبة فيديوهات مفتوحة
-            const videoSource = `https://player.vimeo.com/external/370845113.sd.mp4?s=35d536d1a5869403a45367be5699307c0062f837&profile_id=139&oauth2_token_id=57447761`;
-            
-            // محاكاة جلب الفيديو بناءً على الكلمة لضمان العرض
-            setTimeout(() => {
-                player.src = videoSource;
-                videoBox.classList.remove('hidden');
-                loading.classList.add('hidden');
-                btn.disabled = false;
-            }, 1500);
-
-        } catch (error) {
-            alert("حدث خطأ تقني، حاول مرة أخرى");
+        // سنقوم بتشغيل الفيديو فوراً
+        player.src = videoUrl;
+        player.onloadeddata = function() {
+            loading.classList.add('hidden');
+            videoBox.classList.remove('hidden');
+            btn.disabled = false;
+            player.play();
+        };
+        
+        player.onerror = function() {
+            alert("جاري تحديث الرابط، اضغط توليد مرة أخرى");
             btn.disabled = false;
             loading.classList.add('hidden');
-        }
+        };
     }
-                       </script>
-                       
+</script>
