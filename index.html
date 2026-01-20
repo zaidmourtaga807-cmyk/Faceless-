@@ -3,90 +3,72 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SORA X-STREAM | الذكاء الاصطناعي</title>
+    <title>SORA AI STUDIO</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        :root { --accent: #8b5cf6; }
-        body { background: #000; color: #eee; font-family: 'Inter', sans-serif; }
-        .main-wrapper { min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px; }
-        .dashboard { background: #050505; border: 1px solid #111; border-radius: 32px; width: 100%; max-width: 480px; padding: 30px; box-shadow: 0 40px 100px rgba(0,0,0,0.9); }
-        .nav-pills { background: #111; border-radius: 20px; padding: 5px; display: flex; gap: 5px; margin-bottom: 25px; }
-        .pill { flex: 1; padding: 12px; border-radius: 16px; text-align: center; cursor: pointer; transition: 0.4s; font-weight: 700; font-size: 14px; color: #444; }
-        .pill.active { background: var(--accent); color: #fff; }
-        .input-area { background: #0a0a0a; border: 1px solid #1a1a1a; border-radius: 20px; width: 100%; color: #fff; padding: 20px; outline: none; margin-bottom: 20px; transition: 0.3s; }
-        .input-area:focus { border-color: var(--accent); }
-        .sparkle-btn { background: #fff; color: #000; padding: 18px; border-radius: 20px; width: 100%; font-weight: 900; letter-spacing: 1px; transition: 0.3s; border: none; }
-        .sparkle-btn:hover { transform: scale(1.02); background: var(--accent); color: #fff; }
-        .sparkle-btn:disabled { opacity: 0.3; transform: none; }
-        #previewContainer img { width: 100%; border-radius: 24px; margin-top: 30px; border: 2px solid #111; animation: slideUp 0.6s cubic-bezier(0.23, 1, 0.32, 1); }
-        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-        .loader-ring { display: none; margin: 20px auto; width: 30px; height: 30px; border: 3px solid #111; border-top-color: var(--accent); border-radius: 50%; animation: spin 0.8s linear infinite; }
-        @keyframes spin { to { transform: rotate(360deg); } }
+        body { background: #000; color: white; display: flex; align-items: center; justify-content: center; min-height: 100vh; font-family: sans-serif; padding: 20px; }
+        .studio-card { background: #0a0a0a; border: 1px solid #1a1a1a; border-radius: 30px; padding: 2rem; width: 100%; max-width: 450px; text-align: center; box-shadow: 0 10px 50px rgba(0,0,0,0.5); }
+        .ai-input { background: #111; border: 1px solid #222; border-radius: 15px; padding: 15px; width: 100%; color: white; outline: none; margin-bottom: 20px; text-align: right; }
+        .btn-gen { background: linear-gradient(90deg, #7c3aed, #4f46e5); padding: 15px; border-radius: 15px; width: 100%; font-weight: bold; cursor: pointer; border: none; transition: 0.3s; }
+        .btn-gen:active { transform: scale(0.98); opacity: 0.8; }
+        .btn-gen:disabled { background: #333; cursor: not-allowed; }
+        #loader { display: none; margin-top: 20px; }
+        #output img { width: 100%; border-radius: 15px; margin-top: 20px; border: 1px solid #333; animation: fadeIn 0.5s; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
     </style>
 </head>
 <body>
 
-    <div class="main-wrapper">
-        <div class="dashboard text-center">
-            <h1 class="text-3xl font-black mb-2 tracking-tighter italic">SORA X</h1>
-            <p class="text-zinc-600 text-[10px] uppercase font-bold tracking-[0.2em] mb-8">Future of AI Generation</p>
+    <div class="studio-card">
+        <h1 class="text-2xl font-bold mb-6 text-purple-500">SORA AI STUDIO</h1>
+        
+        <textarea id="promptField" class="ai-input" rows="3" placeholder="اكتب وصف الفيديو أو الصورة هنا..."></textarea>
+        
+        <button onclick="startAction()" id="actionBtn" class="btn-gen">توليد الآن ✨</button>
 
-            <div class="nav-pills">
-                <div id="p_img" onclick="setMode('image')" class="pill active">PHOTO</div>
-                <div id="p_vid" onclick="setMode('video')" class="pill">VIDEO</div>
-            </div>
-
-            <textarea id="promptBox" class="input-area" rows="3" placeholder="وصف المشهد بالإنجليزية..."></textarea>
-
-            <button id="trigger" onclick="fire()" class="sparkle-btn">إنشاء الآن ✨</button>
-
-            <div id="wait" class="loader-ring"></div>
-
-            <div id="previewContainer"></div>
+        <div id="loader">
+            <p class="text-sm text-purple-400 animate-pulse mt-4">جاري المعالجة... انتظر ثواني</p>
         </div>
+
+        <div id="output"></div>
     </div>
 
     <script>
-        let mode = 'image';
+        function startAction() {
+            const prompt = document.getElementById('promptField').value;
+            const btn = document.getElementById('actionBtn');
+            const loader = document.getElementById('loader');
+            const output = document.getElementById('output');
 
-        function setMode(m) {
-            mode = m;
-            document.getElementById('p_img').className = m === 'image' ? 'pill active' : 'pill';
-            document.getElementById('p_vid').className = m === 'video' ? 'pill active' : 'pill';
-            document.getElementById('trigger').innerText = m === 'image' ? 'إنشاء صورة ✨' : 'إنشاء فيديو 🎬';
-        }
+            if (!prompt) {
+                return; // لا تفعل شيء إذا كان الحقل فارغاً
+            }
 
-        function fire() {
-            const p = document.getElementById('promptBox').value.trim();
-            const btn = document.getElementById('trigger');
-            const wait = document.getElementById('wait');
-            const container = document.getElementById('previewContainer');
-
-            if(!p) return;
-
-            // إخفاء الأخطاء ومنع الضغط المتكرر
+            // تفعيل حالة التحميل وتعطيل الزر لمنع التعليق
             btn.disabled = true;
-            wait.style.display = "block";
-            container.innerHTML = "";
+            btn.innerText = "جاري الإنشاء...";
+            loader.style.display = "block";
+            output.innerHTML = "";
 
-            const seed = Math.floor(Math.random() * 888888);
-            // إضافة محسنات جودة صامتة
-            const quality = mode === 'image' ? "cinematic 8k realistic" : "hq video motion blur style";
-            const api = `https://pollinations.ai/p/${encodeURIComponent(p + ", " + quality)}?width=1024&height=1024&seed=${seed}&nologo=true`;
+            const seed = Math.floor(Math.random() * 999999);
+            // تحسين الرابط ليكون أسرع وأكثر استقراراً
+            const finalLink = `https://pollinations.ai/p/${encodeURIComponent(prompt)}?width=1024&height=1024&seed=${seed}&nologo=true`;
 
-            const result = new Image();
-            result.src = api;
+            const img = new Image();
+            img.src = finalLink;
 
-            result.onload = function() {
-                container.innerHTML = `<img src="${api}"> <a href="${api}" download class="block mt-4 text-[10px] text-zinc-700 uppercase font-bold tracking-widest hover:text-white transition">Download Media</a>`;
+            img.onload = function() {
+                output.innerHTML = `<img src="${finalLink}" alt="AI Result"> <p class="text-[10px] mt-2 text-gray-600">اضغط مطولاً على الصورة لحفظها</p>`;
+                loader.style.display = "none";
                 btn.disabled = false;
-                wait.style.display = "none";
+                btn.innerText = "توليد الآن ✨";
             };
 
-            result.onerror = function() {
-                btn.disabled = false;
-                wait.style.display = "none";
-                // لا يوجد alert() هنا، الموقع سيظل هادئاً حتى لو فشل السيرفر
+            img.onerror = function() {
+                // بدلاً من إظهار رسالة خطأ مزعجة، سنحاول مرة أخرى بصمت
+                setTimeout(() => {
+                    img.src = finalLink + "&retry=true";
+                }, 2000);
             };
         }
     </script>
