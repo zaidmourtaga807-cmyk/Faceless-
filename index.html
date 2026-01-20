@@ -3,55 +3,87 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SORA AI ULTRA</title>
+    <title>SORA STUDIO Pro</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        body { background: #000; color: #fff; font-family: sans-serif; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
-        .card { background: #0d0d0d; border: 1px solid #1a1a1a; border-radius: 24px; width: 90%; max-width: 400px; padding: 24px; box-shadow: 0 20px 50px rgba(0,0,0,0.5); }
-        .btn { background: #7c3aed; color: #fff; padding: 14px; border-radius: 12px; width: 100%; font-weight: bold; margin-top: 15px; cursor: pointer; border: none; transition: 0.2s; }
-        .btn:active { transform: scale(0.95); opacity: 0.8; }
-        #loader { display: none; color: #7c3aed; font-size: 12px; margin-top: 15px; text-align: center; }
-        img { width: 100%; border-radius: 16px; border: 1px solid #333; margin-top: 20px; }
+        body { background: #000; color: #fff; font-family: sans-serif; min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 15px; }
+        .studio-card { background: #080808; border: 1px solid #1a1a1a; border-radius: 28px; width: 100%; max-width: 420px; padding: 25px; box-shadow: 0 25px 50px rgba(0,0,0,0.7); }
+        .tab-group { display: flex; gap: 10px; margin-bottom: 20px; background: #111; padding: 5px; border-radius: 15px; }
+        .tab { flex: 1; padding: 10px; border-radius: 12px; cursor: pointer; text-align: center; font-weight: bold; font-size: 14px; transition: 0.3s; color: #444; }
+        .tab.active { background: #7c3aed; color: #fff; }
+        .ai-input { background: #0f0f0f; border: 1px solid #222; border-radius: 15px; width: 100%; color: #fff; padding: 15px; outline: none; margin-bottom: 15px; transition: 0.3s; }
+        .ai-input:focus { border-color: #7c3aed; }
+        .btn-fire { background: linear-gradient(90deg, #7c3aed, #4f46e5); padding: 16px; border-radius: 15px; width: 100%; font-weight: 900; cursor: pointer; border: none; }
+        .btn-fire:active { transform: scale(0.97); opacity: 0.8; }
+        #status { display: none; margin-top: 15px; color: #7c3aed; font-size: 12px; text-align: center; font-weight: bold; }
+        #resultArea img { width: 100%; border-radius: 20px; margin-top: 20px; border: 1px solid #333; animation: zoomIn 0.5s ease; }
+        @keyframes zoomIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
     </style>
 </head>
 <body>
-    <div class="card text-center">
-        <h1 class="text-xl font-black mb-6 text-purple-500">SORA AI ULTRA</h1>
-        <textarea id="p" class="w-full bg-zinc-900 border border-zinc-800 p-4 rounded-xl text-white outline-none mb-2" rows="3" placeholder="اكتب وصفك هنا..."></textarea>
-        <button id="b" onclick="generate()" class="btn">إنشاء المشهد الآن ✨</button>
-        <div id="loader" class="animate-pulse">جاري التحميل من السيرفر المستقر...</div>
-        <div id="out"></div>
+
+    <div class="studio-card">
+        <h1 class="text-center text-xl font-black mb-6 text-white italic">SORA STUDIO <span class="text-purple-500">PRO</span></h1>
+        
+        <div class="tab-group">
+            <div id="t_img" onclick="switchMode('image')" class="tab active">صور 🖼️</div>
+            <div id="t_vid" onclick="switchMode('video')" class="tab">فيديو 🎬</div>
+        </div>
+
+        <textarea id="promptInp" class="ai-input" rows="3" placeholder="وصف المشهد بالإنجليزية..."></textarea>
+        
+        <button id="mainBtn" onclick="generate()" class="btn-fire">بدء المعالجة ⚡</button>
+
+        <div id="status" class="animate-pulse">جاري الاتصال بالسيرفر وتوليد المحتوى...</div>
+        
+        <div id="resultArea"></div>
     </div>
 
     <script>
+        let currentMode = 'image';
+
+        function switchMode(m) {
+            currentMode = m;
+            document.getElementById('t_img').className = m === 'image' ? 'tab active' : 'tab';
+            document.getElementById('t_vid').className = m === 'video' ? 'tab active' : 'tab';
+            document.getElementById('mainBtn').innerText = m === 'image' ? 'إنشاء صورة ✨' : 'إنشاء فيديو 🎬';
+        }
+
         function generate() {
-            const prompt = document.getElementById('p').value;
-            const btn = document.getElementById('b');
-            const loader = document.getElementById('loader');
-            const out = document.getElementById('out');
+            const p = document.getElementById('promptInp').value.trim();
+            const btn = document.getElementById('mainBtn');
+            const status = document.getElementById('status');
+            const area = document.getElementById('resultArea');
 
-            if (!prompt) return;
+            if (!p) return;
 
+            // تجهيز الواجهة وتجنب التعليق الملاحظ في الفيديو
             btn.disabled = true;
-            loader.style.display = "block";
-            out.innerHTML = "";
+            status.style.display = "block";
+            area.innerHTML = "";
 
-            const seed = Math.floor(Math.random() * 100000);
-            // تغيير السيرفر لمحرك أكثر استقراراً لضمان عدم ظهور "السيرفر مضغوط"
-            const url = `https://image.pollinations.ai/prompt/${encodeURIComponent(prompt)}?width=1024&height=1024&seed=${seed}&nologo=true`;
+            const seed = Math.floor(Math.random() * 888888);
+            
+            // إضافة برومبتات ذكية لمحاكاة الفيديو عند اختيار خانة الفيديو
+            const extra = currentMode === 'image' ? "realistic, 8k" : "cinematic motion, slow movement, video loop style, high frame rate";
+            
+            // استخدام رابط مباشر لتجنب رسائل Rate Limit المزعجة
+            const finalUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(p + ", " + extra)}?width=1024&height=1024&seed=${seed}&nologo=true`;
 
             const img = new Image();
-            img.src = url;
+            img.src = finalUrl;
 
             img.onload = function() {
-                out.innerHTML = `<img src="${url}">`;
-                loader.style.display = "none";
+                area.innerHTML = `<img src="${finalUrl}"> <p class="text-[10px] mt-3 text-zinc-600 text-center italic">تم التوليد بنجاح - اضغط مطولاً للحفظ</p>`;
                 btn.disabled = false;
+                status.style.display = "none";
             };
 
             img.onerror = function() {
-                loader.innerText = "السيرفر استغرق وقتاً، جارٍ المحاولة تلقائياً...";
-                setTimeout(() => { img.src = url + "&retry=true"; }, 2000);
+                btn.disabled = false;
+                status.style.display = "none";
+                // محاولة إعادة التحميل بصمت في حال فشل السيرفر
+                setTimeout(() => { img.src = finalUrl + "&retry=true"; }, 1000);
             };
         }
     </script>
