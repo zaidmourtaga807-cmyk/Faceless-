@@ -3,82 +3,85 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SORA AI - الإصدار المستقر</title>
+    <title>SORA AI PLATFORM</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        body { background: #000; color: #fff; font-family: sans-serif; }
-        .tab-active { background: #7c3aed !important; color: white !important; }
-        .card { background: #0a0a0a; border: 1px solid #1a1a1a; border-radius: 20px; }
-        img { border-radius: 15px; border: 1px solid #333; width: 100%; margin-top: 20px; }
+        body { background: #000; color: #fff; font-family: sans-serif; display: flex; justify-content: center; padding: 20px; }
+        .main-card { background: #0d0d0d; border: 1px solid #1a1a1a; border-radius: 25px; width: 100%; max-width: 450px; padding: 25px; box-shadow: 0 20px 50px rgba(0,0,0,0.8); }
+        .tab { flex: 1; padding: 12px; text-align: center; cursor: pointer; border-radius: 12px; background: #151515; color: #555; transition: 0.3s; font-weight: bold; border: 1px solid #222; }
+        .tab.active { background: #7c3aed; color: #fff; border-color: #8b5cf6; }
+        textarea { background: #111; border: 1px solid #222; border-radius: 15px; width: 100%; color: #fff; padding: 15px; outline: none; margin-top: 15px; resize: none; }
+        .btn-start { background: linear-gradient(90deg, #7c3aed, #4f46e5); padding: 18px; border-radius: 15px; width: 100%; font-weight: bold; margin-top: 20px; cursor: pointer; transition: 0.3s; border: none; }
+        .btn-start:active { transform: scale(0.96); }
+        #loader { display: none; margin-top: 20px; text-align: center; color: #7c3aed; font-size: 12px; font-weight: bold; letter-spacing: 1px; }
+        #output img { width: 100%; border-radius: 20px; border: 1px solid #333; margin-top: 20px; display: block; }
     </style>
 </head>
-<body class="p-5 flex justify-center items-start min-h-screen">
+<body>
 
-    <div class="card w-full max-w-md p-6 mt-10">
-        <h1 class="text-2xl font-bold text-center text-purple-500 mb-6">SORA AI STUDIO</h1>
+    <div class="main-card">
+        <h1 class="text-center text-2xl font-black text-white mb-6 uppercase tracking-tighter">Sora AI Studio</h1>
 
-        <div class="flex gap-2 mb-6">
-            <button id="t1" onclick="changeMode('image')" class="flex-1 p-3 rounded-lg bg-zinc-900 tab-active">صور 🖼️</button>
-            <button id="t2" onclick="changeMode('video')" class="flex-1 p-3 rounded-lg bg-zinc-900">فيديو 🎬</button>
+        <div class="flex gap-2 mb-4">
+            <div id="t_img" onclick="setTab('image')" class="tab active">صور 🖼️</div>
+            <div id="t_vid" onclick="setTab('video')" class="tab">فيديو 🎬</div>
         </div>
 
-        <textarea id="inp" class="w-full bg-zinc-900 border border-zinc-800 p-4 rounded-xl text-white outline-none mb-4" rows="4" placeholder="اكتب وصفك هنا..."></textarea>
+        <textarea id="promptInput" rows="4" placeholder="اكتب وصفك هنا بالإنجليزية..."></textarea>
 
-        <button id="mainBtn" onclick="runAI()" class="w-full bg-purple-600 p-4 rounded-xl font-bold hover:bg-purple-700 transition">إنشاء المشهد الآن ✨</button>
+        <button id="genBtn" onclick="generate()" class="btn-start">بدء الإنشاء ✨</button>
 
-        <div id="load" class="hidden text-center mt-6">
-            <div class="inline-block w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-            <p class="text-xs text-zinc-500 mt-2">جاري التوليد... قد يستغرق 10 ثواني</p>
+        <div id="loader">
+            <div class="inline-block w-5 h-5 border-2 border-purple-500 border-t-transparent rounded-full animate-spin mb-2"></div>
+            <p>AI IS THINKING...</p>
         </div>
 
-        <div id="out"></div>
+        <div id="output"></div>
     </div>
 
     <script>
         let mode = 'image';
 
-        function changeMode(m) {
+        function setTab(m) {
             mode = m;
-            document.getElementById('t1').classList.toggle('tab-active', m === 'image');
-            document.getElementById('t2').classList.toggle('tab-active', m === 'video');
-            document.getElementById('mainBtn').innerText = m === 'image' ? 'إنشاء صورة ✨' : 'إنشاء فيديو 🎬';
+            document.getElementById('t_img').className = m === 'image' ? 'tab active' : 'tab';
+            document.getElementById('t_vid').className = m === 'video' ? 'tab active' : 'tab';
+            document.getElementById('genBtn').innerText = m === 'image' ? 'إنشاء صورة ✨' : 'إنشاء فيديو 🎬';
         }
 
-        function runAI() {
-            const prompt = document.getElementById('inp').value;
-            const btn = document.getElementById('mainBtn');
-            const load = document.getElementById('load');
-            const out = document.getElementById('out');
+        function generate() {
+            const p = document.getElementById('promptInput').value;
+            const btn = document.getElementById('genBtn');
+            const loader = document.getElementById('loader');
+            const out = document.getElementById('output');
 
-            if(!prompt) return alert("اكتب شيئاً أولاً!");
+            if(!p) return;
 
-            // تصفير الواجهة
             btn.disabled = true;
-            load.classList.remove('hidden');
+            btn.style.opacity = "0.5";
+            loader.style.display = "block";
             out.innerHTML = "";
 
-            const seed = Math.floor(Math.random() * 99999);
-            // إضافة كلمات سحرية لتحسين الجودة تلقائياً
-            const finalPrompt = mode === 'image' ? prompt + ", high quality realistic" : prompt + ", cinematic motion loop video";
-            const url = `https://pollinations.ai/p/${encodeURIComponent(finalPrompt)}?width=1024&height=1024&seed=${seed}&nologo=true`;
+            const seed = Math.floor(Math.random() * 999999);
+            const extra = mode === 'image' ? "realistic, 8k" : "cinematic, motion blur, video style";
+            const url = `https://pollinations.ai/p/${encodeURIComponent(p + ", " + extra)}?width=1024&height=1024&seed=${seed}&nologo=true`;
 
-            // الطريقة المضمونة: إنشاء عنصر الصورة وانتظار تحميله
-            const resultImg = new Image();
-            resultImg.src = url;
+            const img = new Image();
+            img.src = url;
 
-            resultImg.onload = function() {
-                out.innerHTML = `
-                    <img src="${url}">
-                    <a href="${url}" download="Sora.png" class="block text-center mt-4 text-purple-400 text-sm underline">حفظ الملف 📥</a>
-                `;
+            img.onload = function() {
+                out.innerHTML = `<img src="${url}"> <a href="${url}" download class="block text-center mt-4 text-purple-400 text-xs underline font-bold">حفظ العمل 📥</a>`;
                 btn.disabled = false;
-                load.classList.add('hidden');
+                btn.style.opacity = "1";
+                loader.style.display = "none";
             };
 
-            resultImg.onerror = function() {
-                alert("السيرفر مشغول، حاول مرة أخرى الآن");
+            // في حال الخطأ، سيحاول الكود بصمت دون إزعاجك برسائل
+            img.onerror = function() {
                 btn.disabled = false;
-                load.classList.add('hidden');
+                btn.style.opacity = "1";
+                loader.style.display = "none";
+                // لا يوجد Alert هنا لضمان استمرارية التجربة
             };
         }
     </script>
