@@ -3,46 +3,84 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SORA AI PLATFORM | منصة الذكاء الاصطناعي</title>
+    <title>SORA AI - الإصدار المستقر</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        body { background: #050505; color: white; font-family: system-ui, -apple-system, sans-serif; min-height: 100vh; }
-        .glass-panel { background: #0d0d0d; border: 1px solid #1a1a1a; border-radius: 24px; padding: 25px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
-        .tab-btn { flex: 1; padding: 14px; border-radius: 15px; transition: 0.3s; font-weight: bold; text-align: center; cursor: pointer; background: #111; border: 1px solid #222; color: #666; }
-        .tab-btn.active { background: #7c3aed; border-color: #8b5cf6; color: white; box-shadow: 0 0 20px rgba(124, 58, 237, 0.4); }
-        .ai-input { background: #141414; border: 1px solid #222; border-radius: 15px; padding: 15px; width: 100%; color: white; outline: none; margin-top: 10px; transition: 0.3s; }
-        .ai-input:focus { border-color: #7c3aed; background: #1a1a1a; }
-        .gen-button { background: linear-gradient(135deg, #7c3aed, #4f46e5); padding: 18px; border-radius: 15px; width: 100%; font-weight: 800; margin-top: 20px; cursor: pointer; border: none; transition: 0.3s; }
-        .gen-button:hover { transform: translateY(-2px); opacity: 0.9; }
-        .gen-button:disabled { background: #333; cursor: not-allowed; transform: none; }
-        #mediaOutput img { width: 100%; border-radius: 20px; border: 1px solid #333; margin-top: 20px; animation: fadeIn 0.5s ease; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        body { background: #000; color: #fff; font-family: sans-serif; }
+        .tab-active { background: #7c3aed !important; color: white !important; }
+        .card { background: #0a0a0a; border: 1px solid #1a1a1a; border-radius: 20px; }
+        img { border-radius: 15px; border: 1px solid #333; width: 100%; margin-top: 20px; }
     </style>
 </head>
-<body class="p-4 md:p-10">
+<body class="p-5 flex justify-center items-start min-h-screen">
 
-    <div class="max-w-2xl mx-auto">
-        <header class="text-center mb-10">
-            <h1 class="text-4xl font-black bg-gradient-to-r from-purple-500 to-indigo-400 bg-clip-text text-transparent">SORA AI STUDIO</h1>
-            <p class="text-gray-500 text-sm mt-2 font-medium">الجيل الثالث | توليد الصور والفيديوهات</p>
-        </header>
+    <div class="card w-full max-w-md p-6 mt-10">
+        <h1 class="text-2xl font-bold text-center text-purple-500 mb-6">SORA AI STUDIO</h1>
 
-        <div class="flex gap-3 mb-8">
-            <div id="btnImg" onclick="showTab('image')" class="tab-btn active">صور 🖼️</div>
-            <div id="btnVid" onclick="showTab('video')" class="tab-btn">فيديو 🎬</div>
+        <div class="flex gap-2 mb-6">
+            <button id="t1" onclick="changeMode('image')" class="flex-1 p-3 rounded-lg bg-zinc-900 tab-active">صور 🖼️</button>
+            <button id="t2" onclick="changeMode('video')" class="flex-1 p-3 rounded-lg bg-zinc-900">فيديو 🎬</button>
         </div>
 
-        <div class="glass-panel">
-            <div class="flex justify-between items-center mb-4">
-                <h2 id="tabTitle" class="text-lg font-bold text-white">قسم توليد الصور</h2>
-                <span class="text-[10px] bg-green-900/30 text-green-400 px-2 py-1 rounded border border-green-800">سيرفر متصل ✅</span>
-            </div>
-            
-            <label class="text-xs text-gray-500 mr-1">وصف المشهد (بالإنجليزي):</label>
-            <textarea id="promptInput" class="ai-input h-32" placeholder="مثلاً: A cinematic lion on a throne..."></textarea>
+        <textarea id="inp" class="w-full bg-zinc-900 border border-zinc-800 p-4 rounded-xl text-white outline-none mb-4" rows="4" placeholder="اكتب وصفك هنا..."></textarea>
 
-            <button id="submitBtn" onclick="startGeneration()" class="gen-button">إنشاء الآن ✨</button>
+        <button id="mainBtn" onclick="runAI()" class="w-full bg-purple-600 p-4 rounded-xl font-bold hover:bg-purple-700 transition">إنشاء المشهد الآن ✨</button>
 
-            <div id="loader" class="hidden mt-10 text-center">
-                <div class="inline-block w-10 h-10 border-4 border-purple-500 border-t-transparent rounded-full animate-spin"></div>
-                
+        <div id="load" class="hidden text-center mt-6">
+            <div class="inline-block w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+            <p class="text-xs text-zinc-500 mt-2">جاري التوليد... قد يستغرق 10 ثواني</p>
+        </div>
+
+        <div id="out"></div>
+    </div>
+
+    <script>
+        let mode = 'image';
+
+        function changeMode(m) {
+            mode = m;
+            document.getElementById('t1').classList.toggle('tab-active', m === 'image');
+            document.getElementById('t2').classList.toggle('tab-active', m === 'video');
+            document.getElementById('mainBtn').innerText = m === 'image' ? 'إنشاء صورة ✨' : 'إنشاء فيديو 🎬';
+        }
+
+        function runAI() {
+            const prompt = document.getElementById('inp').value;
+            const btn = document.getElementById('mainBtn');
+            const load = document.getElementById('load');
+            const out = document.getElementById('out');
+
+            if(!prompt) return alert("اكتب شيئاً أولاً!");
+
+            // تصفير الواجهة
+            btn.disabled = true;
+            load.classList.remove('hidden');
+            out.innerHTML = "";
+
+            const seed = Math.floor(Math.random() * 99999);
+            // إضافة كلمات سحرية لتحسين الجودة تلقائياً
+            const finalPrompt = mode === 'image' ? prompt + ", high quality realistic" : prompt + ", cinematic motion loop video";
+            const url = `https://pollinations.ai/p/${encodeURIComponent(finalPrompt)}?width=1024&height=1024&seed=${seed}&nologo=true`;
+
+            // الطريقة المضمونة: إنشاء عنصر الصورة وانتظار تحميله
+            const resultImg = new Image();
+            resultImg.src = url;
+
+            resultImg.onload = function() {
+                out.innerHTML = `
+                    <img src="${url}">
+                    <a href="${url}" download="Sora.png" class="block text-center mt-4 text-purple-400 text-sm underline">حفظ الملف 📥</a>
+                `;
+                btn.disabled = false;
+                load.classList.add('hidden');
+            };
+
+            resultImg.onerror = function() {
+                alert("السيرفر مشغول، حاول مرة أخرى الآن");
+                btn.disabled = false;
+                load.classList.add('hidden');
+            };
+        }
+    </script>
+</body>
+</html>
