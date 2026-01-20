@@ -3,72 +3,55 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SORA AI STUDIO</title>
+    <title>SORA FAST AI</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        body { background: #000; color: white; display: flex; align-items: center; justify-content: center; min-height: 100vh; font-family: sans-serif; padding: 20px; }
-        .studio-card { background: #0a0a0a; border: 1px solid #1a1a1a; border-radius: 30px; padding: 2rem; width: 100%; max-width: 450px; text-align: center; box-shadow: 0 10px 50px rgba(0,0,0,0.5); }
-        .ai-input { background: #111; border: 1px solid #222; border-radius: 15px; padding: 15px; width: 100%; color: white; outline: none; margin-bottom: 20px; text-align: right; }
-        .btn-gen { background: linear-gradient(90deg, #7c3aed, #4f46e5); padding: 15px; border-radius: 15px; width: 100%; font-weight: bold; cursor: pointer; border: none; transition: 0.3s; }
-        .btn-gen:active { transform: scale(0.98); opacity: 0.8; }
-        .btn-gen:disabled { background: #333; cursor: not-allowed; }
-        #loader { display: none; margin-top: 20px; }
-        #output img { width: 100%; border-radius: 15px; margin-top: 20px; border: 1px solid #333; animation: fadeIn 0.5s; }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-    </style>
 </head>
-<body>
+<body style="background: #000; color: #fff; display: flex; justify-content: center; align-items: center; min-height: 100vh; font-family: sans-serif; padding: 15px;">
 
-    <div class="studio-card">
-        <h1 class="text-2xl font-bold mb-6 text-purple-500">SORA AI STUDIO</h1>
+    <div style="background: #0a0a0a; padding: 25px; border-radius: 20px; width: 100%; max-width: 380px; text-align: center; border: 1px solid #1a1a1a;">
+        <h1 style="color: #a855f7; font-size: 22px; font-weight: 900; margin-bottom: 20px;">SORA FAST ⚡</h1>
         
-        <textarea id="promptField" class="ai-input" rows="3" placeholder="اكتب وصف الفيديو أو الصورة هنا..."></textarea>
+        <textarea id="p" style="width: 100%; background: #111; border: 1px solid #222; border-radius: 12px; padding: 12px; color: #fff; margin-bottom: 15px; outline: none;" rows="3" placeholder="اكتب وصفك هنا..."></textarea>
         
-        <button onclick="startAction()" id="actionBtn" class="btn-gen">توليد الآن ✨</button>
+        <button id="b" onclick="go()" style="width: 100%; background: #7c3aed; color: #fff; padding: 14px; border-radius: 12px; font-weight: bold; border: none; cursor: pointer;">إنشاء سريع ✨</button>
 
-        <div id="loader">
-            <p class="text-sm text-purple-400 animate-pulse mt-4">جاري المعالجة... انتظر ثواني</p>
-        </div>
-
-        <div id="output"></div>
+        <div id="l" style="display: none; margin-top: 15px; color: #7c3aed; font-size: 13px;" class="animate-pulse">⚡ جاري التوليد السريع...</div>
+        <div id="res" style="margin-top: 15px;"></div>
     </div>
 
     <script>
-        function startAction() {
-            const prompt = document.getElementById('promptField').value;
-            const btn = document.getElementById('actionBtn');
-            const loader = document.getElementById('loader');
-            const output = document.getElementById('output');
+        function go() {
+            const prompt = document.getElementById('p').value;
+            const btn = document.getElementById('b');
+            const loader = document.getElementById('l');
+            const res = document.getElementById('res');
 
-            if (!prompt) {
-                return; // لا تفعل شيء إذا كان الحقل فارغاً
-            }
+            if (!prompt) return;
 
-            // تفعيل حالة التحميل وتعطيل الزر لمنع التعليق
             btn.disabled = true;
-            btn.innerText = "جاري الإنشاء...";
+            btn.style.opacity = "0.4";
             loader.style.display = "block";
-            output.innerHTML = "";
+            res.innerHTML = "";
 
-            const seed = Math.floor(Math.random() * 999999);
-            // تحسين الرابط ليكون أسرع وأكثر استقراراً
-            const finalLink = `https://pollinations.ai/p/${encodeURIComponent(prompt)}?width=1024&height=1024&seed=${seed}&nologo=true`;
+            // تقليل الأبعاد قليلاً لضمان سرعة الاستجابة وتجنب تعليق السيرفر
+            const seed = Math.floor(Math.random() * 9999);
+            const url = `https://pollinations.ai/p/${encodeURIComponent(prompt)}?width=768&height=768&seed=${seed}&model=flux&nologo=true`;
 
             const img = new Image();
-            img.src = finalLink;
+            img.src = url;
 
             img.onload = function() {
-                output.innerHTML = `<img src="${finalLink}" alt="AI Result"> <p class="text-[10px] mt-2 text-gray-600">اضغط مطولاً على الصورة لحفظها</p>`;
-                loader.style.display = "none";
+                res.innerHTML = `<img src="${url}" style="width: 100%; border-radius: 12px; border: 1px solid #333;">`;
                 btn.disabled = false;
-                btn.innerText = "توليد الآن ✨";
+                btn.style.opacity = "1";
+                loader.style.display = "none";
             };
 
             img.onerror = function() {
-                // بدلاً من إظهار رسالة خطأ مزعجة، سنحاول مرة أخرى بصمت
-                setTimeout(() => {
-                    img.src = finalLink + "&retry=true";
-                }, 2000);
+                res.innerHTML = "<p style='color:red; font-size:12px;'>السيرفر مضغوط، اضغط إنشاء مرة أخرى</p>";
+                btn.disabled = false;
+                btn.style.opacity = "1";
+                loader.style.display = "none";
             };
         }
     </script>
